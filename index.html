@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg: #f5f5f7;
-      --panel: rgba(255, 255, 255, 0.78);
+      --panel: #ffffffcc;
       --panel-solid: #ffffff;
       --text: #1d1d1f;
       --muted: #6e6e73;
@@ -15,6 +15,7 @@
       --accent: #0071e3;
       --accent-soft: #e9f2ff;
       --danger: #d70015;
+      --success: #2a8f4a;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
       --q1: #ff453a;
       --q2: #ff9f0a;
@@ -30,23 +31,23 @@
       background: radial-gradient(circle at top, #ffffff, var(--bg) 60%);
       color: var(--text);
       min-height: 100vh;
-      padding: 28px;
+      padding: 24px;
     }
 
     .app {
-      max-width: 1280px;
+      max-width: 1320px;
       margin: 0 auto;
       display: grid;
-      gap: 18px;
+      gap: 16px;
     }
 
     .top {
       background: var(--panel);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      border: 1px solid #ffffff99;
       box-shadow: var(--shadow);
       border-radius: 20px;
-      padding: 22px;
+      padding: 20px;
     }
 
     h1 {
@@ -62,58 +63,44 @@
     }
 
     .composer {
-      margin-top: 18px;
+      margin-top: 16px;
       display: grid;
       gap: 10px;
     }
 
     .composer-toolbar {
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
-      gap: 10px;
       align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .label {
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.8rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: var(--muted);
+      font-weight: 600;
     }
 
-    .default-target {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    select, textarea, button {
+    textarea, button {
       font: inherit;
-    }
-
-    select {
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 10px;
-      padding: 6px 10px;
-      color: var(--text);
     }
 
     textarea {
       width: 100%;
-      min-height: 110px;
+      min-height: 92px;
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 14px;
+      padding: 12px;
       resize: vertical;
       background: #fff;
       color: var(--text);
       line-height: 1.45;
     }
 
-    textarea:focus, select:focus, button:focus {
+    textarea:focus, button:focus {
       outline: 3px solid rgba(0, 113, 227, 0.2);
       outline-offset: 1px;
     }
@@ -136,7 +123,7 @@
       border-radius: 999px;
       background: var(--accent);
       color: #fff;
-      padding: 9px 16px;
+      padding: 9px 15px;
       cursor: pointer;
       font-weight: 600;
     }
@@ -145,25 +132,34 @@
       filter: brightness(1.05);
     }
 
-    .board {
+    .workspace {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(260px, 0.85fr) minmax(0, 2fr);
       gap: 14px;
+      align-items: start;
     }
 
-    .quadrant {
+    .panel {
       background: var(--panel-solid);
       border: 1px solid var(--line);
       border-radius: 18px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-      min-height: 260px;
-      display: grid;
-      grid-template-rows: auto 1fr;
+      overflow: hidden;
     }
 
-    .quadrant-head {
-      padding: 14px 14px 10px;
+    .panel-head {
+      padding: 14px;
       border-bottom: 1px solid #f0f0f2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -176,24 +172,26 @@
       flex-shrink: 0;
     }
 
+    .inbox-dot { background: #007aff; }
+    .done-dot { background: var(--success); }
     .q1 .dot { background: var(--q1); }
     .q2 .dot { background: var(--q2); }
     .q3 .dot { background: var(--q3); }
     .q4 .dot { background: var(--q4); }
 
-    .quadrant-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin: 0;
-    }
-
     .count {
-      margin-left: auto;
       color: var(--muted);
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       background: #f2f2f7;
       border-radius: 999px;
       padding: 3px 8px;
+    }
+
+    .sidebar {
+      display: grid;
+      gap: 12px;
+      position: sticky;
+      top: 16px;
     }
 
     .task-list {
@@ -203,6 +201,9 @@
       display: grid;
       gap: 8px;
       align-content: start;
+      min-height: 100px;
+      max-height: 340px;
+      overflow: auto;
     }
 
     .task-list.empty::after {
@@ -211,7 +212,7 @@
       color: var(--muted);
       font-size: 0.85rem;
       text-align: center;
-      padding: 26px 8px;
+      padding: 22px 8px;
     }
 
     .task-list.over {
@@ -223,16 +224,16 @@
       background: #fff;
       border: 1px solid #ededf1;
       border-radius: 12px;
-      padding: 10px 10px;
+      padding: 9px;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       cursor: grab;
     }
 
     .task.dragging {
-      opacity: 0.5;
+      opacity: 0.45;
     }
 
     .task.selected {
@@ -240,9 +241,18 @@
       background: #f6faff;
     }
 
+    .task.done {
+      opacity: 0.7;
+    }
+
+    .task.done .task-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
     .task-check {
-      width: 17px;
-      height: 17px;
+      width: 16px;
+      height: 16px;
       accent-color: var(--accent);
       cursor: pointer;
     }
@@ -250,7 +260,7 @@
     .task-text {
       margin: 0;
       line-height: 1.35;
-      font-size: 0.93rem;
+      font-size: 0.92rem;
       word-break: break-word;
     }
 
@@ -269,18 +279,86 @@
       background: #f2f2f7;
     }
 
+    .board {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .quadrant {
+      background: var(--panel-solid);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      min-height: 270px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .quadrant-head {
+      padding: 14px;
+      border-bottom: 1px solid #f0f0f2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quadrant-title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .drop-bin {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%) translateY(140%);
+      bottom: 16px;
+      width: min(520px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid #ffccd2;
+      background: #fff7f8;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      z-index: 50;
+      transition: transform 180ms ease;
+    }
+
+    body.dragging-active .drop-bin {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .drop-bin strong {
+      color: var(--danger);
+      font-size: 0.92rem;
+    }
+
+    .drop-bin span {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .drop-bin.over {
+      border-color: var(--danger);
+      background: #ffecef;
+    }
+
     .bulk {
       position: sticky;
-      bottom: 14px;
+      bottom: 10px;
       z-index: 10;
       display: none;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       flex-wrap: wrap;
-      padding: 12px;
+      padding: 11px;
       border-radius: 16px;
-      background: rgba(255, 255, 255, 0.9);
+      background: #ffffffe6;
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
@@ -291,23 +369,23 @@
     }
 
     .bulk strong {
-      font-size: 0.92rem;
+      font-size: 0.9rem;
     }
 
     .bulk-actions {
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .chip {
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 7px 12px;
+      padding: 7px 11px;
       background: #fff;
       color: var(--text);
       cursor: pointer;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
     }
 
     .chip:hover {
@@ -316,19 +394,23 @@
     }
 
     .chip.danger {
-      border-color: #ffd6dc;
       color: var(--danger);
+      border-color: #ffd6dc;
     }
 
-    .chip.danger:hover {
-      background: #fff5f7;
-      border-color: #ffc2cc;
+    @media (max-width: 1040px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+      }
     }
 
     @media (max-width: 900px) {
       body { padding: 16px; }
       .board { grid-template-columns: 1fr; }
-      h1 { font-size: 1.65rem; }
+      h1 { font-size: 1.7rem; }
     }
   </style>
 </head>
@@ -336,98 +418,114 @@
   <main class="app">
     <section class="top">
       <h1>Task Quadrants</h1>
-      <p class="subtitle">Simple, human planning with smart input, drag-and-drop, and multi-select moves.</p>
-
+      <p class="subtitle">Add tasks to your sidebar inbox, then drag them into quadrants or into the completed bin.</p>
       <div class="composer">
         <div class="composer-toolbar">
-          <span class="label">Paste or type tasks</span>
-          <label class="default-target">
-            <span class="label">Default</span>
-            <select id="defaultQuadrant" aria-label="Default quadrant for new tasks">
-              <option value="q1">Urgent + Important</option>
-              <option value="q2">Not Urgent + Important</option>
-              <option value="q3">Urgent + Not Important</option>
-              <option value="q4" selected>Not Urgent + Not Important</option>
-            </select>
-          </label>
+          <span class="label">Task input</span>
+          <span class="label">Smart quantities supported: <code>x2</code> / <code>2x</code></span>
         </div>
-
         <textarea id="taskInput" placeholder="One task per line.
 Examples:
+Housekeeping on AT shelf
 Step Switches x2
-2x Battery Interrupter
-Housekeeping on AT shelf"></textarea>
-
+2x Battery Interrupter"></textarea>
         <div class="composer-actions">
-          <span class="hint">Uses smart quantity parsing (`x2`, `2x`) and creates separate task cards.</span>
-          <button class="primary" id="addTasksBtn" type="button">Add Tasks</button>
+          <span class="hint">Tasks land in the sidebar inbox by default.</span>
+          <button class="primary" id="addTasksBtn" type="button">Add to Inbox</button>
         </div>
       </div>
     </section>
 
-    <section class="board" id="board">
-      <article class="quadrant q1">
-        <header class="quadrant-head">
-          <span class="dot"></span>
-          <h2 class="quadrant-title">Urgent + Important</h2>
-          <span class="count" id="count-q1">0</span>
-        </header>
-        <ul class="task-list empty" id="q1"></ul>
-      </article>
+    <section class="workspace">
+      <aside class="sidebar">
+        <article class="panel">
+          <header class="panel-head">
+            <h2 class="panel-title"><span class="dot inbox-dot"></span>Task Inbox</h2>
+            <span class="count" id="count-inbox">0</span>
+          </header>
+          <ul class="task-list empty" id="inbox"></ul>
+        </article>
 
-      <article class="quadrant q2">
-        <header class="quadrant-head">
-          <span class="dot"></span>
-          <h2 class="quadrant-title">Not Urgent + Important</h2>
-          <span class="count" id="count-q2">0</span>
-        </header>
-        <ul class="task-list empty" id="q2"></ul>
-      </article>
+        <article class="panel">
+          <header class="panel-head">
+            <h2 class="panel-title"><span class="dot done-dot"></span>Completed Pile</h2>
+            <span class="count" id="count-completed">0</span>
+          </header>
+          <ul class="task-list empty" id="completed"></ul>
+        </article>
+      </aside>
 
-      <article class="quadrant q3">
-        <header class="quadrant-head">
-          <span class="dot"></span>
-          <h2 class="quadrant-title">Urgent + Not Important</h2>
-          <span class="count" id="count-q3">0</span>
-        </header>
-        <ul class="task-list empty" id="q3"></ul>
-      </article>
+      <div class="board">
+        <article class="quadrant q1">
+          <header class="quadrant-head">
+            <span class="dot"></span>
+            <h2 class="quadrant-title">Urgent + Important</h2>
+            <span class="count" id="count-q1">0</span>
+          </header>
+          <ul class="task-list empty" id="q1"></ul>
+        </article>
 
-      <article class="quadrant q4">
-        <header class="quadrant-head">
-          <span class="dot"></span>
-          <h2 class="quadrant-title">Not Urgent + Not Important</h2>
-          <span class="count" id="count-q4">0</span>
-        </header>
-        <ul class="task-list empty" id="q4"></ul>
-      </article>
+        <article class="quadrant q2">
+          <header class="quadrant-head">
+            <span class="dot"></span>
+            <h2 class="quadrant-title">Not Urgent + Important</h2>
+            <span class="count" id="count-q2">0</span>
+          </header>
+          <ul class="task-list empty" id="q2"></ul>
+        </article>
+
+        <article class="quadrant q3">
+          <header class="quadrant-head">
+            <span class="dot"></span>
+            <h2 class="quadrant-title">Urgent + Not Important</h2>
+            <span class="count" id="count-q3">0</span>
+          </header>
+          <ul class="task-list empty" id="q3"></ul>
+        </article>
+
+        <article class="quadrant q4">
+          <header class="quadrant-head">
+            <span class="dot"></span>
+            <h2 class="quadrant-title">Not Urgent + Not Important</h2>
+            <span class="count" id="count-q4">0</span>
+          </header>
+          <ul class="task-list empty" id="q4"></ul>
+        </article>
+      </div>
     </section>
 
     <section class="bulk" id="bulkBar" aria-live="polite">
       <strong id="bulkCount">0 selected</strong>
       <div class="bulk-actions">
+        <button class="chip" data-move="inbox" type="button">Move to Inbox</button>
         <button class="chip" data-move="q1" type="button">Move to Urgent+Important</button>
         <button class="chip" data-move="q2" type="button">Move to Important</button>
         <button class="chip" data-move="q3" type="button">Move to Urgent</button>
         <button class="chip" data-move="q4" type="button">Move to Backlog</button>
+        <button class="chip" data-move="completed" type="button">Move to Completed</button>
         <button class="chip danger" id="deleteSelectedBtn" type="button">Delete selected</button>
       </div>
     </section>
   </main>
 
+  <section class="drop-bin" id="doneDrop" aria-label="Drop tasks here to complete">
+    <strong>Drop to Complete</strong>
+    <span>Drag any task here to move it into Completed Pile</span>
+  </section>
+
   <script>
-    const STORAGE_KEY = "task_quadrants_v4";
-    const PREF_KEY = "task_quadrants_default";
-    const QUADRANTS = ["q1", "q2", "q3", "q4"];
-    const emptyState = { q1: [], q2: [], q3: [], q4: [] };
+    const STORAGE_KEY = "task_quadrants_v5";
+    const ZONES = ["inbox", "q1", "q2", "q3", "q4", "completed"];
+    const MATRIX_ZONES = ["q1", "q2", "q3", "q4"];
+    const emptyState = { inbox: [], q1: [], q2: [], q3: [], q4: [], completed: [] };
     let state = loadState();
     let selected = new Set();
 
     const inputEl = document.getElementById("taskInput");
     const addBtn = document.getElementById("addTasksBtn");
-    const defaultEl = document.getElementById("defaultQuadrant");
     const bulkBar = document.getElementById("bulkBar");
     const bulkCountEl = document.getElementById("bulkCount");
+    const doneDrop = document.getElementById("doneDrop");
 
     function uid() {
       if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -442,10 +540,12 @@ Housekeeping on AT shelf"></textarea>
         if (!raw) return structuredClone(emptyState);
         const parsed = JSON.parse(raw);
         return {
+          inbox: Array.isArray(parsed.inbox) ? parsed.inbox : [],
           q1: Array.isArray(parsed.q1) ? parsed.q1 : [],
           q2: Array.isArray(parsed.q2) ? parsed.q2 : [],
           q3: Array.isArray(parsed.q3) ? parsed.q3 : [],
-          q4: Array.isArray(parsed.q4) ? parsed.q4 : []
+          q4: Array.isArray(parsed.q4) ? parsed.q4 : [],
+          completed: Array.isArray(parsed.completed) ? parsed.completed : []
         };
       } catch (error) {
         console.error("Failed to load task state:", error);
@@ -455,34 +555,6 @@ Housekeeping on AT shelf"></textarea>
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function loadDefaultQuadrant() {
-      const pref = localStorage.getItem(PREF_KEY);
-      if (pref && QUADRANTS.includes(pref)) {
-        defaultEl.value = pref;
-      }
-    }
-
-    function parseLine(line) {
-      const trimmed = line.trim();
-      if (!trimmed) return [];
-
-      const trailing = trimmed.match(/^(.+?)\s*[xX×]\s*(\d+)$/);
-      if (trailing) {
-        const text = trailing[1].trim();
-        const count = Number(trailing[2]);
-        return expandTask(text, count);
-      }
-
-      const leading = trimmed.match(/^(\d+)\s*[xX×]\s*(.+)$/);
-      if (leading) {
-        const count = Number(leading[1]);
-        const text = leading[2].trim();
-        return expandTask(text, count);
-      }
-
-      return [{ id: uid(), text: trimmed }];
     }
 
     function expandTask(text, count) {
@@ -495,22 +567,37 @@ Housekeeping on AT shelf"></textarea>
       return tasks;
     }
 
-    function parseInput(input) {
-      return input
-        .split("\n")
-        .map((line) => parseLine(line))
-        .flat();
+    function parseLine(line) {
+      const trimmed = line.trim();
+      if (!trimmed) return [];
+
+      const trailing = trimmed.match(/^(.+?)\s*[xX×]\s*(\d+)$/);
+      if (trailing) return expandTask(trailing[1].trim(), Number(trailing[2]));
+
+      const leading = trimmed.match(/^(\d+)\s*[xX×]\s*(.+)$/);
+      if (leading) return expandTask(leading[2].trim(), Number(leading[1]));
+
+      return [{ id: uid(), text: trimmed }];
     }
 
-    function addTasksFromInput() {
+    function parseInput(input) {
+      return input.split("\n").map((line) => parseLine(line)).flat();
+    }
+
+    function addTasksToInbox() {
       const tasks = parseInput(inputEl.value);
       if (!tasks.length) return;
-      const target = defaultEl.value;
-      state[target].push(...tasks);
+      state.inbox.push(...tasks);
       inputEl.value = "";
       saveState();
       render();
       inputEl.focus();
+    }
+
+    function updateBulkBar() {
+      const count = selected.size;
+      bulkBar.classList.toggle("visible", count > 0);
+      bulkCountEl.textContent = `${count} selected`;
     }
 
     function toggleSelect(id) {
@@ -520,35 +607,30 @@ Housekeeping on AT shelf"></textarea>
       render();
     }
 
-    function clearSelection() {
-      selected.clear();
-      updateBulkBar();
-      render();
-    }
-
-    function removeTask(quadrant, id) {
-      state[quadrant] = state[quadrant].filter((task) => task.id !== id);
+    function removeTask(zone, id) {
+      state[zone] = state[zone].filter((task) => task.id !== id);
       selected.delete(id);
       saveState();
       updateBulkBar();
       render();
     }
 
-    function moveTaskIds(ids, targetQuadrant) {
-      if (!ids.length || !QUADRANTS.includes(targetQuadrant)) return;
+    function moveTaskIds(ids, targetZone) {
+      if (!Array.isArray(ids) || ids.length === 0 || !ZONES.includes(targetZone)) return;
       const idSet = new Set(ids);
       const moved = [];
 
-      for (const quadrant of QUADRANTS) {
+      for (const zone of ZONES) {
         const kept = [];
-        for (const task of state[quadrant]) {
+        for (const task of state[zone]) {
           if (idSet.has(task.id)) moved.push(task);
           else kept.push(task);
         }
-        state[quadrant] = kept;
+        state[zone] = kept;
       }
 
-      state[targetQuadrant].push(...moved);
+      state[targetZone].push(...moved);
+      selected.clear();
       saveState();
       updateBulkBar();
       render();
@@ -556,8 +638,8 @@ Housekeeping on AT shelf"></textarea>
 
     function deleteSelected() {
       if (!selected.size) return;
-      for (const quadrant of QUADRANTS) {
-        state[quadrant] = state[quadrant].filter((task) => !selected.has(task.id));
+      for (const zone of ZONES) {
+        state[zone] = state[zone].filter((task) => !selected.has(task.id));
       }
       selected.clear();
       saveState();
@@ -565,13 +647,14 @@ Housekeeping on AT shelf"></textarea>
       render();
     }
 
-    function createTaskElement(task, quadrant) {
+    function createTaskElement(task, zone) {
       const li = document.createElement("li");
       li.className = "task";
+      if (zone === "completed") li.classList.add("done");
+      if (selected.has(task.id)) li.classList.add("selected");
       li.draggable = true;
       li.dataset.id = task.id;
-      li.dataset.quadrant = quadrant;
-      if (selected.has(task.id)) li.classList.add("selected");
+      li.dataset.zone = zone;
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -593,102 +676,115 @@ Housekeeping on AT shelf"></textarea>
       del.textContent = "×";
       del.addEventListener("click", (event) => {
         event.stopPropagation();
-        removeTask(quadrant, task.id);
+        removeTask(zone, task.id);
       });
 
       li.append(checkbox, text, del);
-
       li.addEventListener("click", () => toggleSelect(task.id));
 
       li.addEventListener("dragstart", (event) => {
+        document.body.classList.add("dragging-active");
         li.classList.add("dragging");
         const ids = selected.has(task.id) ? [...selected] : [task.id];
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("application/json", JSON.stringify({ ids }));
       });
 
-      li.addEventListener("dragend", () => li.classList.remove("dragging"));
+      li.addEventListener("dragend", () => {
+        li.classList.remove("dragging");
+        document.body.classList.remove("dragging-active");
+        doneDrop.classList.remove("over");
+      });
+
       return li;
     }
 
     function updateCounts() {
-      for (const quadrant of QUADRANTS) {
-        document.getElementById(`count-${quadrant}`).textContent = String(state[quadrant].length);
+      for (const zone of ZONES) {
+        document.getElementById(`count-${zone}`).textContent = String(state[zone].length);
       }
     }
 
-    function updateBulkBar() {
-      const count = selected.size;
-      bulkBar.classList.toggle("visible", count > 0);
-      bulkCountEl.textContent = `${count} selected`;
+    function renderZone(zone) {
+      const list = document.getElementById(zone);
+      list.innerHTML = "";
+      const isEmpty = state[zone].length === 0;
+      list.classList.toggle("empty", isEmpty);
+      if (!isEmpty) {
+        for (const task of state[zone]) {
+          list.appendChild(createTaskElement(task, zone));
+        }
+      }
     }
 
     function render() {
-      for (const quadrant of QUADRANTS) {
-        const list = document.getElementById(quadrant);
-        list.innerHTML = "";
-        list.classList.toggle("empty", state[quadrant].length === 0);
-        for (const task of state[quadrant]) {
-          list.appendChild(createTaskElement(task, quadrant));
-        }
-      }
+      for (const zone of ZONES) renderZone(zone);
       updateCounts();
     }
 
-    addBtn.addEventListener("click", addTasksFromInput);
+    addBtn.addEventListener("click", addTasksToInbox);
 
     inputEl.addEventListener("keydown", (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault();
-        addTasksFromInput();
+        addTasksToInbox();
       }
     });
 
-    defaultEl.addEventListener("change", () => {
-      localStorage.setItem(PREF_KEY, defaultEl.value);
-    });
-
     document.querySelectorAll("[data-move]").forEach((button) => {
-      button.addEventListener("click", () => {
-        moveTaskIds([...selected], button.dataset.move);
-      });
+      button.addEventListener("click", () => moveTaskIds([...selected], button.dataset.move));
     });
 
     document.getElementById("deleteSelectedBtn").addEventListener("click", deleteSelected);
 
-    document.querySelectorAll(".task-list").forEach((list) => {
+    const dropTargets = ["inbox", ...MATRIX_ZONES, "completed"];
+    dropTargets.forEach((zone) => {
+      const list = document.getElementById(zone);
       list.addEventListener("dragover", (event) => {
         event.preventDefault();
         list.classList.add("over");
       });
-
-      list.addEventListener("dragleave", () => {
-        list.classList.remove("over");
-      });
-
+      list.addEventListener("dragleave", () => list.classList.remove("over"));
       list.addEventListener("drop", (event) => {
         event.preventDefault();
         list.classList.remove("over");
-        const target = list.id;
         const raw = event.dataTransfer.getData("application/json");
         if (!raw) return;
-
         let payload;
         try {
           payload = JSON.parse(raw);
         } catch (error) {
-          console.error("Failed to parse drag payload:", error);
+          console.error("Failed to parse drop payload:", error);
           return;
         }
-
         if (!payload || !Array.isArray(payload.ids)) return;
-        moveTaskIds(payload.ids, target);
+        moveTaskIds(payload.ids, zone);
       });
     });
 
-    loadDefaultQuadrant();
-    updateBulkBar();
+    doneDrop.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      doneDrop.classList.add("over");
+    });
+    doneDrop.addEventListener("dragleave", () => doneDrop.classList.remove("over"));
+    doneDrop.addEventListener("drop", (event) => {
+      event.preventDefault();
+      doneDrop.classList.remove("over");
+      const raw = event.dataTransfer.getData("application/json");
+      if (!raw) return;
+      let payload;
+      try {
+        payload = JSON.parse(raw);
+      } catch (error) {
+        console.error("Failed to parse bin payload:", error);
+        return;
+      }
+      if (!payload || !Array.isArray(payload.ids)) return;
+      moveTaskIds(payload.ids, "completed");
+    });
+
     render();
+    updateBulkBar();
   </script>
 </body>
 </html>
