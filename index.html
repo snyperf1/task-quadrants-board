@@ -124,14 +124,104 @@
       border-radius: 8px;
     }
 
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .modal textarea {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .modal button {
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .modal .btn-cancel {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .modal .btn-import {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header button {
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 780px) {
       .board { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <h1>My Task Noteboards</h1>
-  <p class="sub">Drag tasks across quadrants to allocate by urgency and importance.</p>
+  <div class="header">
+    <div>
+      <h1>My Task Noteboards</h1>
+      <p class="sub">Drag tasks across quadrants to allocate by urgency and importance.</p>
+    </div>
+    <button onclick="openImportModal()">+ Bulk Import</button>
+  </div>
 
   <section class="board">
     <article class="quadrant" data-quadrant="q1">
@@ -170,6 +260,17 @@
       </form>
     </article>
   </section>
+
+  <div id="importModal" class="modal">
+    <div class="modal-content">
+      <h3>Import Tasks</h3>
+      <textarea id="importText" placeholder="Paste your task list here. Each line is a task.&#10;Supports quantities like 'Task x2' → creates two separate items."></textarea>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeImportModal()">Cancel</button>
+        <button class="btn-import" onclick="importTasks()">Import to Urgent+Important</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const STORAGE_KEY = "quadrant_tasks_v1";
@@ -270,6 +371,52 @@
         saveState();
         render();
       });
+    });
+
+    function openImportModal() {
+      document.getElementById("importModal").classList.add("open");
+      document.getElementById("importText").focus();
+    }
+
+    function closeImportModal() {
+      document.getElementById("importModal").classList.remove("open");
+      document.getElementById("importText").value = "";
+    }
+
+    function importTasks() {
+      const text = document.getElementById("importText").value.trim();
+      if (!text) return;
+
+      const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+      let added = 0;
+
+      lines.forEach((line) => {
+        const match = line.match(/^(.+?)\s+x(\d+)$/);
+        if (match) {
+          const [, taskText, count] = match;
+          const qty = parseInt(count, 10);
+          for (let i = 0; i < qty; i++) {
+            state.q1.push({ id: crypto.randomUUID(), text: taskText });
+            added++;
+          }
+        } else {
+          state.q1.push({ id: crypto.randomUUID(), text: line });
+          added++;
+        }
+      });
+
+      saveState();
+      render();
+      closeImportModal();
+      alert(`✓ Imported ${added} task${added === 1 ? "" : "s"} to Urgent+Important`);
+    }
+
+    document.getElementById("importModal").addEventListener("click", (e) => {
+      if (e.target.id === "importModal") closeImportModal();
+    });
+
+    document.getElementById("importText").addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeImportModal();
     });
 
     render();
