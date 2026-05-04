@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Quadrants Board</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --accent: #2563eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+    }
+
+    p.sub {
+      margin: 0 0 20px;
+      color: var(--muted);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .quadrant {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quadrant h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .task-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-height: 110px;
+    }
+
+    .task {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      cursor: grab;
+    }
+
+    .task.dragging {
+      opacity: 0.5;
+    }
+
+    .task button {
+      border: 0;
+      background: transparent;
+      color: #ef4444;
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 2px;
+    }
+
+    .add-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-form input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 0.92rem;
+    }
+
+    .add-form button {
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .task-list.over {
+      outline: 2px dashed var(--accent);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 780px) {
+      .board { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>My Task Noteboards</h1>
+  <p class="sub">Drag tasks across quadrants to allocate by urgency and importance.</p>
+
+  <section class="board">
+    <article class="quadrant" data-quadrant="q1">
+      <h2>Urgent + Important</h2>
+      <ul class="task-list" id="q1"></ul>
+      <form class="add-form" data-target="q1">
+        <input type="text" placeholder="Add task..." required />
+        <button type="submit">Add</button>
+      </form>
+    </article>
+
+    <article class="quadrant" data-quadrant="q2">
+      <h2>Not Urgent + Important</h2>
+      <ul class="task-list" id="q2"></ul>
+      <form class="add-form" data-target="q2">
+        <input type="text" placeholder="Add task..." required />
+        <button type="submit">Add</button>
+      </form>
+    </article>
+
+    <article class="quadrant" data-quadrant="q3">
+      <h2>Urgent + Not Important</h2>
+      <ul class="task-list" id="q3"></ul>
+      <form class="add-form" data-target="q3">
+        <input type="text" placeholder="Add task..." required />
+        <button type="submit">Add</button>
+      </form>
+    </article>
+
+    <article class="quadrant" data-quadrant="q4">
+      <h2>Not Urgent + Not Important</h2>
+      <ul class="task-list" id="q4"></ul>
+      <form class="add-form" data-target="q4">
+        <input type="text" placeholder="Add task..." required />
+        <button type="submit">Add</button>
+      </form>
+    </article>
+  </section>
+
+  <script>
+    const STORAGE_KEY = "quadrant_tasks_v1";
+    const defaults = { q1: [], q2: [], q3: [], q4: [] };
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaults);
+        const parsed = JSON.parse(raw);
+        return { ...structuredClone(defaults), ...parsed };
+      } catch {
+        return structuredClone(defaults);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function removeTask(quadrant, id) {
+      state[quadrant] = state[quadrant].filter((t) => t.id !== id);
+      saveState();
+      render();
+    }
+
+    function createTaskElement(task, quadrant) {
+      const li = document.createElement("li");
+      li.className = "task";
+      li.draggable = true;
+      li.dataset.id = task.id;
+      li.dataset.from = quadrant;
+
+      const text = document.createElement("span");
+      text.textContent = task.text;
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.textContent = "×";
+      del.title = "Delete task";
+      del.addEventListener("click", () => removeTask(quadrant, task.id));
+
+      li.append(text, del);
+
+      li.addEventListener("dragstart", (e) => {
+        li.classList.add("dragging");
+        e.dataTransfer.setData("text/plain", JSON.stringify({ id: task.id, from: quadrant }));
+      });
+
+      li.addEventListener("dragend", () => li.classList.remove("dragging"));
+      return li;
+    }
+
+    function render() {
+      document.querySelectorAll(".task-list").forEach((list) => (list.innerHTML = ""));
+      Object.entries(state).forEach(([quadrant, tasks]) => {
+        const list = document.getElementById(quadrant);
+        tasks.forEach((task) => list.appendChild(createTaskElement(task, quadrant)));
+      });
+    }
+
+    document.querySelectorAll(".add-form").forEach((form) => {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = form.querySelector("input");
+        const text = input.value.trim();
+        if (!text) return;
+
+        const target = form.dataset.target;
+        state[target].push({ id: crypto.randomUUID(), text });
+        input.value = "";
+        saveState();
+        render();
+      });
+    });
+
+    document.querySelectorAll(".task-list").forEach((list) => {
+      list.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        list.classList.add("over");
+      });
+
+      list.addEventListener("dragleave", () => list.classList.remove("over"));
+
+      list.addEventListener("drop", (e) => {
+        e.preventDefault();
+        list.classList.remove("over");
+        const to = list.id;
+        const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+        if (!data || !data.id || !data.from) return;
+        if (data.from === to) return;
+
+        const index = state[data.from].findIndex((t) => t.id === data.id);
+        if (index < 0) return;
+        const [task] = state[data.from].splice(index, 1);
+        state[to].push(task);
+        saveState();
+        render();
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>
