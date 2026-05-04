@@ -18,6 +18,7 @@
       --q2: #f59e0b;
       --q3: #8b5cf6;
       --q4: #6b7280;
+      --danger: #dc2626;
     }
 
     * { box-sizing: border-box; }
@@ -66,6 +67,13 @@
       margin-bottom: 48px;
     }
 
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
     .input-label {
       display: block;
       font-size: 0.85rem;
@@ -73,7 +81,22 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--text-muted);
-      margin-bottom: 12px;
+    }
+
+    .default-quadrant {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .default-quadrant select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     .textarea-wrapper {
@@ -210,10 +233,28 @@
       opacity: 0.3;
     }
 
+    .task.selected {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent);
+    }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
     .task-text {
       flex: 1;
       line-height: 1.4;
       word-break: break-word;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 4px;
     }
 
     .task button {
@@ -238,6 +279,71 @@
       border-radius: 8px;
     }
 
+    .bulk-actions {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .bulk-actions.visible {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .bulk-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .bulk-info strong {
+      color: var(--text);
+    }
+
+    .bulk-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bulk-btn {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bulk-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .bulk-btn.danger {
+      color: var(--danger);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    .bulk-btn.danger:hover {
+      background: rgba(220, 38, 38, 0.15);
+      border-color: var(--danger);
+    }
+
     .footer {
       text-align: center;
       padding-top: 40px;
@@ -257,6 +363,8 @@
       h1 { font-size: 1.8rem; }
       .input-section { margin-bottom: 32px; }
       #taskInput { min-height: 100px; }
+      .input-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .bulk-actions { left: 16px; right: 16px; }
     }
   </style>
 </head>
@@ -268,7 +376,18 @@
     </header>
 
     <section class="input-section">
-      <label class="input-label">Paste or type your tasks</label>
+      <div class="input-header">
+        <label class="input-label">Paste or type your tasks</label>
+        <div class="default-quadrant">
+          <label for="defaultQuadrant">Default:</label>
+          <select id="defaultQuadrant">
+            <option value="q1">Urgent & Important</option>
+            <option value="q2">Not Urgent & Important</option>
+            <option value="q3">Urgent & Not Important</option>
+            <option value="q4" selected>Not Urgent & Not Important</option>
+          </select>
+        </div>
+      </div>
       <div class="textarea-wrapper">
         <textarea
           id="taskInput"
@@ -276,7 +395,7 @@
         ></textarea>
       </div>
       <p class="input-hint">
-        ℹ️ Press <kbd>Enter</kbd> to add a task. Use <code>task x5</code> to create 5 copies. Tasks auto-sort to Urgent+Important.
+        ℹ️ Press <kbd>Enter</kbd> to add a task. Use <code>task x5</code> to create 5 copies.
       </p>
     </section>
 
@@ -319,14 +438,28 @@
     </section>
 
     <footer class="footer">
-      <p>💡 Drag tasks between quadrants. Click × to delete. Your tasks are saved locally.</p>
+      <p>💡 Drag tasks between quadrants. Click checkboxes for bulk actions. Your tasks are saved locally.</p>
     </footer>
   </div>
 
+  <div id="bulkActions" class="bulk-actions">
+    <div class="bulk-info">
+      <strong id="selectedCount">0</strong> task(s) selected
+    </div>
+    <div class="bulk-buttons">
+      <button class="bulk-btn" onclick="moveSelectedTo('q1')">→ Urgent & Important</button>
+      <button class="bulk-btn" onclick="moveSelectedTo('q2')">→ Important</button>
+      <button class="bulk-btn" onclick="moveSelectedTo('q3')">→ Urgent</button>
+      <button class="bulk-btn" onclick="moveSelectedTo('q4')">→ Backlog</button>
+      <button class="bulk-btn danger" onclick="deleteSelected()">Delete All</button>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = "quadrant_tasks_v2";
+    const STORAGE_KEY = "quadrant_tasks_v3";
     const defaults = { q1: [], q2: [], q3: [], q4: [] };
     let state = loadState();
+    let selected = new Set();
 
     function loadState() {
       try {
@@ -341,6 +474,10 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getDefaultQuadrant() {
+      return document.getElementById("defaultQuadrant").value;
     }
 
     function parseTaskInput(text) {
@@ -363,10 +500,11 @@
       return tasks;
     }
 
-    function addTask(text, quadrant = "q1") {
+    function addTask(text) {
       if (!text.trim()) return;
       const tasks = parseTaskInput(text);
-      state[quadrant].push(...tasks);
+      const quad = getDefaultQuadrant();
+      state[quad].push(...tasks);
       saveState();
       render();
       return tasks.length;
@@ -374,16 +512,76 @@
 
     function removeTask(quadrant, id) {
       state[quadrant] = state[quadrant].filter((t) => t.id !== id);
+      selected.delete(id);
       saveState();
       render();
+    }
+
+    function selectTask(id) {
+      if (selected.has(id)) {
+        selected.delete(id);
+      } else {
+        selected.add(id);
+      }
+      updateBulkUI();
+      render();
+    }
+
+    function moveSelectedTo(quad) {
+      if (selected.size === 0) return;
+      const moved = [];
+      Object.entries(state).forEach(([q, tasks]) => {
+        state[q] = tasks.filter((t) => {
+          if (selected.has(t.id)) {
+            moved.push(t);
+            return false;
+          }
+          return true;
+        });
+      });
+      state[quad].push(...moved);
+      selected.clear();
+      saveState();
+      render();
+    }
+
+    function deleteSelected() {
+      if (selected.size === 0) return;
+      if (!confirm(`Delete ${selected.size} task(s)?`)) return;
+      Object.entries(state).forEach(([q]) => {
+        state[q] = state[q].filter((t) => !selected.has(t.id));
+      });
+      selected.clear();
+      saveState();
+      render();
+    }
+
+    function updateBulkUI() {
+      const bulk = document.getElementById("bulkActions");
+      if (selected.size > 0) {
+        bulk.classList.add("visible");
+        document.getElementById("selectedCount").textContent = selected.size;
+      } else {
+        bulk.classList.remove("visible");
+      }
     }
 
     function createTaskElement(task, quadrant) {
       const li = document.createElement("li");
       li.className = "task";
+      if (selected.has(task.id)) li.classList.add("selected");
       li.draggable = true;
       li.dataset.id = task.id;
       li.dataset.from = quadrant;
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "task-checkbox";
+      checkbox.checked = selected.has(task.id);
+      checkbox.addEventListener("change", (e) => {
+        e.stopPropagation();
+        selectTask(task.id);
+      });
 
       const text = document.createElement("span");
       text.className = "task-text";
@@ -398,12 +596,30 @@
         removeTask(quadrant, task.id);
       });
 
-      li.append(text, del);
+      const actions = document.createElement("div");
+      actions.className = "task-actions";
+      actions.append(del);
+
+      li.append(checkbox, text, actions);
+
+      li.addEventListener("click", (e) => {
+        if (e.target !== checkbox && e.target !== del) {
+          selectTask(task.id);
+        }
+      });
 
       li.addEventListener("dragstart", (e) => {
-        li.classList.add("dragging");
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/plain", JSON.stringify({ id: task.id, from: quadrant }));
+        if (selected.size > 1) {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("application/json", JSON.stringify({
+            ids: Array.from(selected),
+            from: quadrant
+          }));
+        } else {
+          li.classList.add("dragging");
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", JSON.stringify({ id: task.id, from: quadrant }));
+        }
       });
 
       li.addEventListener("dragend", () => li.classList.remove("dragging"));
@@ -441,7 +657,7 @@
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        const count = addTask(input.value, "q1");
+        const count = addTask(input.value);
         if (count > 0) {
           input.value = "";
           input.focus();
@@ -463,6 +679,12 @@
         list.classList.remove("over");
         const to = list.id;
         try {
+          const jsonData = e.dataTransfer.getData("application/json");
+          if (jsonData) {
+            const data = JSON.parse(jsonData);
+            moveSelectedTo(to);
+            return;
+          }
           const data = JSON.parse(e.dataTransfer.getData("text/plain"));
           if (!data || !data.id || !data.from) return;
           if (data.from === to) return;
